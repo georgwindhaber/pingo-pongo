@@ -70,7 +70,11 @@ const PlayerSelect = ({
               id={resultType + player.id.toString()}
               value={player.id}
               name={resultType}
-              className={clsx("hidden")}
+              className="hidden"
+              checked={
+                (isWinner && winnerId === player.id) ||
+                (isLooser && looserId === player.id)
+              }
               onChange={() => {
                 if (player.id !== winnerId && player.id !== looserId) {
                   onPlayerSelect(player);
@@ -87,8 +91,15 @@ const PlayerSelect = ({
 export default function Home() {
   const [winner, setWinner] = useState<Player | null>(null);
   const [looser, setLooser] = useState<Player | null>(null);
+  const [plays, setPlays] = useState<Array<{ winner: Player; looser: Player }>>(
+    []
+  );
 
   const submitRound = () => {
+    if (winner && looser) {
+      setPlays([...plays, { winner, looser }]);
+    }
+
     setWinner(null);
     setLooser(null);
   };
@@ -130,6 +141,18 @@ export default function Home() {
           Submit
         </button>
       </div>
+      <section className="mt-5">
+        {winner?.id} {winner?.name}
+        {looser?.id} {looser?.name}
+        <h2 className="text-2xl font-bold">History:</h2>
+        <ul className="mt-5">
+          {plays.map((play, index) => (
+            <li key={index}>
+              {play.winner.name} beat {play.looser.name}
+            </li>
+          ))}
+        </ul>
+      </section>
     </main>
   );
 }
