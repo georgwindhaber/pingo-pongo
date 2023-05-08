@@ -24,9 +24,7 @@ const Players: Array<Player> = [
   { id: 8, name: "Daryna", score: 0 },
 ];
 
-const Results: Array<{ winner: number; looser: number }> = [
-  { winner: 1, looser: 2 },
-];
+const disabledStyles = "opacity-50 hover:bg-slate-900";
 
 const PlayerSelect = ({
   players,
@@ -46,48 +44,54 @@ const PlayerSelect = ({
 
   return (
     <form className="grid grid-cols-3 sm:grid-cols-4">
-      {players.map((player) => (
-        <div
-          key={player.id}
-          className={clsx(
-            "bg-slate-900 hover:bg-slate-800 m-1 py-1 px-3 rounded-full text-center",
-            winnerId === player.id &&
-              isWinner &&
-              "bg-green-700 hover:bg-green-600",
-            looserId === player.id && isLooser && "bg-red-700 hover:bg-red-600",
-            winnerId === player.id &&
-              !isWinner &&
-              "opacity-50 hover:bg-slate-900",
-            looserId === player.id &&
-              !isLooser &&
-              "opacity-50 hover:bg-slate-900"
-          )}
-        >
-          <label className="" htmlFor={resultType + player.id.toString()}>
+      {players.map((player) => {
+        let backgroundColor = "bg-slate-900 hover:bg-slate-800";
+        if (winnerId === player.id && isWinner) {
+          backgroundColor = "bg-green-700 hover:bg-green-600";
+        }
+        if (looserId === player.id && isLooser) {
+          backgroundColor = "bg-red-700 hover:bg-red-600";
+        }
+
+        return (
+          <label
+            key={player.id}
+            className={clsx(
+              backgroundColor,
+              "m-1 py-1 px-3 rounded-full text-center",
+              winnerId === player.id && !isWinner && disabledStyles,
+              looserId === player.id && !isLooser && disabledStyles
+            )}
+            htmlFor={resultType + player.id.toString()}
+          >
             {player.name}
+            <input
+              type="radio"
+              id={resultType + player.id.toString()}
+              value={player.id}
+              name={resultType}
+              className={clsx("hidden")}
+              onChange={() => {
+                if (player.id !== winnerId && player.id !== looserId) {
+                  onPlayerSelect(player);
+                }
+              }}
+            />
           </label>
-          <input
-            type="radio"
-            id={resultType + player.id.toString()}
-            value={player.id}
-            name={resultType}
-            className={clsx("hidden")}
-            onChange={() => {
-              if (player.id !== winnerId && player.id !== looserId) {
-                onPlayerSelect(player);
-              }
-            }}
-          />
-        </div>
-      ))}
+        );
+      })}
     </form>
   );
 };
 
 export default function Home() {
-  const [players, setPlayers] = useState<Player[]>(Players);
   const [winner, setWinner] = useState<Player | null>(null);
   const [looser, setLooser] = useState<Player | null>(null);
+
+  const submitRound = () => {
+    setWinner(null);
+    setLooser(null);
+  };
 
   return (
     <main className="flex flex-col items-center justify-between p-3">
@@ -96,7 +100,7 @@ export default function Home() {
       <div>
         Winner:
         <PlayerSelect
-          players={players}
+          players={Players}
           winnerId={winner?.id}
           looserId={looser?.id}
           resultType="winner"
@@ -106,7 +110,7 @@ export default function Home() {
       <div className="mt-5">
         Looser:
         <PlayerSelect
-          players={players}
+          players={Players}
           winnerId={winner?.id}
           looserId={looser?.id}
           resultType="looser"
@@ -115,7 +119,14 @@ export default function Home() {
       </div>
 
       <div className="mt-5">
-        <button className="font-bold text-lg bg-slate-800 hover:bg-slate-700 m-1 py-1 px-5 rounded-full">
+        <button
+          type="button"
+          className={clsx(
+            "font-bold text-lg bg-slate-800 hover:bg-slate-700 m-1 py-1 px-5 rounded-full disabled:opacity-50 disabled:hover:bg-slate-800"
+          )}
+          onClick={submitRound}
+          disabled={!(winner && looser)}
+        >
           Submit
         </button>
       </div>
