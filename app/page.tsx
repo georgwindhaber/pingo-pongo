@@ -9,19 +9,17 @@ const inter = Inter({ subsets: ["latin"] });
 type Player = {
   id: number;
   name: string;
-  score: number;
-  state?: "winner" | "looser";
 };
 
 const Players: Array<Player> = [
-  { id: 1, name: "Serhii", score: 0 },
-  { id: 2, name: "Jonathan", score: 0 },
-  { id: 3, name: "Freddy", score: 0 },
-  { id: 4, name: "Cezary", score: 0 },
-  { id: 5, name: "Ben", score: 0 },
-  { id: 6, name: "Joao", score: 0 },
-  { id: 7, name: "Karla", score: 0 },
-  { id: 8, name: "Daryna", score: 0 },
+  { id: 1, name: "Serhii" },
+  { id: 2, name: "Jonathan" },
+  { id: 3, name: "Freddy" },
+  { id: 4, name: "Cezary" },
+  { id: 5, name: "Ben" },
+  { id: 6, name: "Joao" },
+  { id: 7, name: "Karla" },
+  { id: 8, name: "Daryna" },
 ];
 
 const disabledStyles = "opacity-50 hover:bg-slate-900";
@@ -95,13 +93,20 @@ export default function Home() {
     []
   );
 
-  const submitRound = () => {
+  const submitRound = async () => {
     if (winner && looser) {
       setPlays([...plays, { winner, looser }]);
     }
 
     setWinner(null);
     setLooser(null);
+
+    await fetch("/api/play", {
+      method: "POST",
+      body: JSON.stringify({ winnerId: winner?.id, looserId: looser?.id }),
+    })
+      .then((res) => res.json())
+      .catch((err) => console.error(err));
   };
 
   return (
