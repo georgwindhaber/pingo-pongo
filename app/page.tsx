@@ -147,8 +147,6 @@ export default function Home() {
         </button>
       </div>
       <section className="mt-5">
-        {winner?.id} {winner?.name}
-        {looser?.id} {looser?.name}
         <h2 className="text-2xl font-bold">History:</h2>
         <ul className="mt-5">
           {plays.map((play, index) => (

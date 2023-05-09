@@ -4,14 +4,15 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   const data = await request.json();
 
-  const save = await prisma.play.create({
+  console.log(data);
+
+  // Todo: create players
+  const save = await prisma.game.create({
     data: {
-      winner: data.winnerId,
-      looser: data.looserId,
+      winnerId: data.winnerId,
+      looserId: data.looserId,
     },
   });
-
-  console.log(save);
 
   return NextResponse.json({ response: "ok" });
 }
