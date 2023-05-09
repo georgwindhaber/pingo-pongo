@@ -8,12 +8,13 @@ datasource db {
     relationMode = "prisma"
 }
 
-// model Player {
-//     id   Int    @id @default(autoincrement())
-//     name String
-// }
+model Player {
+    id    Int    @id @default(autoincrement())
+    name  String
+    score Int    @default(400)
+}
 
-model Play {
+model Game {
     id     Int @id @default(autoincrement())
     winner Int
     looser Int
