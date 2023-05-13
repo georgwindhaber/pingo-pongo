@@ -1,27 +1,12 @@
 "use client";
 
 import clsx from "clsx";
-import { Inter } from "next/font/google";
-import { useState } from "react";
-
-const inter = Inter({ subsets: ["latin"] });
+import { useEffect, useState } from "react";
 
 type Player = {
   id: number;
   name: string;
 };
-
-const Players: Array<Player> = [
-  { id: 1, name: "Serhii" },
-  { id: 2, name: "Jonathan" },
-  { id: 3, name: "Freddy" },
-  { id: 4, name: "Cezary" },
-  { id: 5, name: "Ben" },
-  { id: 6, name: "Joao" },
-  { id: 7, name: "Karla" },
-  { id: 8, name: "Daryna" },
-];
-
 const disabledStyles = "opacity-50 hover:bg-slate-900";
 
 const PlayerSelect = ({
@@ -87,11 +72,19 @@ const PlayerSelect = ({
 };
 
 export default function Home() {
+  const [players, setPlayers] = useState<Player[]>([]);
   const [winner, setWinner] = useState<Player | null>(null);
   const [looser, setLooser] = useState<Player | null>(null);
   const [plays, setPlays] = useState<Array<{ winner: Player; looser: Player }>>(
     []
   );
+
+  useEffect(() => {
+    fetch("/api/player")
+      .then((res) => res.json())
+      .then((data) => setPlayers(data.data))
+      .catch((err) => console.error(err));
+  }, []);
 
   const submitRound = async () => {
     if (winner && looser) {
@@ -116,7 +109,7 @@ export default function Home() {
       <div>
         Winner:
         <PlayerSelect
-          players={Players}
+          players={players}
           winnerId={winner?.id}
           looserId={looser?.id}
           resultType="winner"
@@ -126,7 +119,7 @@ export default function Home() {
       <div className="mt-5">
         Looser:
         <PlayerSelect
-          players={Players}
+          players={players}
           winnerId={winner?.id}
           looserId={looser?.id}
           resultType="looser"
