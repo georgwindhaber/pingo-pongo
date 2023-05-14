@@ -3,6 +3,7 @@
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { Reorder } from "framer-motion";
+import Image from "next/image";
 
 type Player = {
   id: number;
@@ -117,9 +118,8 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center justify-between p-3">
-      <h1 className="text-3xl font-bold">Pingo Pongo</h1>
-      <h2>Enter new game:</h2>
-      <div>
+      <Image src="/logo.png" width={200} height={100} alt="Pingo Pongo" />
+      <div className="mt-5">
         Winner:
         <PlayerSelect
           players={players}
