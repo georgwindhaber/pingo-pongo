@@ -22,19 +22,23 @@ export async function POST(request: Request) {
     },
   });
 
-  const [play, winner, looser] = await Promise.all([
+  const [, winner, looser] = await Promise.all([
     playRequest,
     winnerRequest,
     looserRequest,
   ]);
+
+  if (!winner || !looser) {
+    return NextResponse.json({ response: "error" });
+  }
 
   const newWinnerProbability =
     1 / (1 + 10 ** ((looser.score - winner.score) / 400));
   const newLooserProbability =
     1 / (1 + 10 ** ((winner.score - looser.score) / 400));
 
-  const newWinnerScore = winner.score + 50 * (1 - newWinnerProbability);
-  const newLooserScore = looser.score + 50 * (0 - newLooserProbability);
+  const newWinnerScore = winner.score + 20 * (1 - newWinnerProbability);
+  const newLooserScore = looser.score + 20 * (0 - newLooserProbability);
 
   const setWinnerRequest = prisma.player.update({
     where: {
@@ -42,6 +46,9 @@ export async function POST(request: Request) {
     },
     data: {
       score: newWinnerScore,
+      wins: {
+        increment: 1,
+      },
     },
   });
   const setLooserRequest = prisma.player.update({
@@ -55,12 +62,12 @@ export async function POST(request: Request) {
 
   await Promise.all([setWinnerRequest, setLooserRequest]);
 
-  console.log(
-    newWinnerScore,
-    newWinnerProbability,
-    newLooserScore,
-    newLooserProbability
-  );
+  // await prisma.player.updateMany({
+  //   data: {
+  //     score: 400,
+  //     wins: 0,
+  //   },
+  // });
 
   return NextResponse.json({ response: "ok" });
 }
