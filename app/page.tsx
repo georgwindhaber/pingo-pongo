@@ -1,27 +1,15 @@
 "use client";
 
 import clsx from "clsx";
-import { Inter } from "next/font/google";
-import { useState } from "react";
-
-const inter = Inter({ subsets: ["latin"] });
+import { useEffect, useState } from "react";
+import { Reorder } from "framer-motion";
 
 type Player = {
   id: number;
   name: string;
+  score: number;
+  wins: number;
 };
-
-const Players: Array<Player> = [
-  { id: 1, name: "Serhii" },
-  { id: 2, name: "Jonathan" },
-  { id: 3, name: "Freddy" },
-  { id: 4, name: "Cezary" },
-  { id: 5, name: "Ben" },
-  { id: 6, name: "Joao" },
-  { id: 7, name: "Karla" },
-  { id: 8, name: "Daryna" },
-];
-
 const disabledStyles = "opacity-50 hover:bg-slate-900";
 
 const PlayerSelect = ({
@@ -42,56 +30,72 @@ const PlayerSelect = ({
 
   return (
     <form className="grid grid-cols-3 sm:grid-cols-4">
-      {players.map((player) => {
-        let backgroundColor = "bg-slate-900 hover:bg-slate-800";
-        if (winnerId === player.id && isWinner) {
-          backgroundColor = "bg-green-700 hover:bg-green-600";
-        }
-        if (looserId === player.id && isLooser) {
-          backgroundColor = "bg-red-700 hover:bg-red-600";
-        }
+      {players
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((player) => {
+          let backgroundColor = "bg-slate-900 hover:bg-slate-800";
+          if (winnerId === player.id && isWinner) {
+            backgroundColor = "bg-green-700 hover:bg-green-600";
+          }
+          if (looserId === player.id && isLooser) {
+            backgroundColor = "bg-red-700 hover:bg-red-600";
+          }
 
-        return (
-          <label
-            key={player.id}
-            className={clsx(
-              backgroundColor,
-              "m-1 py-1 px-3 rounded-full text-center",
-              winnerId === player.id && !isWinner && disabledStyles,
-              looserId === player.id && !isLooser && disabledStyles
-            )}
-            htmlFor={resultType + player.id.toString()}
-          >
-            {player.name}
-            <input
-              type="radio"
-              id={resultType + player.id.toString()}
-              value={player.id}
-              name={resultType}
-              className="hidden"
-              checked={
-                (isWinner && winnerId === player.id) ||
-                (isLooser && looserId === player.id)
-              }
-              onChange={() => {
-                if (player.id !== winnerId && player.id !== looserId) {
-                  onPlayerSelect(player);
+          return (
+            <label
+              key={player.id}
+              className={clsx(
+                backgroundColor,
+                "m-1 py-1 px-3 rounded-full text-center",
+                winnerId === player.id && !isWinner && disabledStyles,
+                looserId === player.id && !isLooser && disabledStyles
+              )}
+              htmlFor={resultType + player.id.toString()}
+            >
+              {player.name}
+              <input
+                type="radio"
+                id={resultType + player.id.toString()}
+                value={player.id}
+                name={resultType}
+                className="hidden"
+                checked={
+                  (isWinner && winnerId === player.id) ||
+                  (isLooser && looserId === player.id)
                 }
-              }}
-            />
-          </label>
-        );
-      })}
+                onChange={() => {
+                  if (player.id !== winnerId && player.id !== looserId) {
+                    onPlayerSelect(player);
+                  }
+                }}
+              />
+            </label>
+          );
+        })}
     </form>
   );
 };
 
 export default function Home() {
+  const [players, setPlayers] = useState<Player[]>([]);
   const [winner, setWinner] = useState<Player | null>(null);
   const [looser, setLooser] = useState<Player | null>(null);
   const [plays, setPlays] = useState<Array<{ winner: Player; looser: Player }>>(
     []
   );
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchPlayers = async () => {
+    setIsLoading(true);
+    const playersRequest = await fetch("/api/player");
+    const players = await playersRequest.json();
+    setPlayers(players.data.sort((a: Player, b: Player) => b.id - a.id));
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    fetchPlayers();
+  }, []);
 
   const submitRound = async () => {
     if (winner && looser) {
@@ -107,6 +111,8 @@ export default function Home() {
     })
       .then((res) => res.json())
       .catch((err) => console.error(err));
+
+    fetchPlayers();
   };
 
   return (
@@ -116,7 +122,7 @@ export default function Home() {
       <div>
         Winner:
         <PlayerSelect
-          players={Players}
+          players={players}
           winnerId={winner?.id}
           looserId={looser?.id}
           resultType="winner"
@@ -126,7 +132,7 @@ export default function Home() {
       <div className="mt-5">
         Looser:
         <PlayerSelect
-          players={Players}
+          players={players}
           winnerId={winner?.id}
           looserId={looser?.id}
           resultType="looser"
@@ -146,16 +152,42 @@ export default function Home() {
           Submit
         </button>
       </div>
-      <section className="mt-5">
-        <h2 className="text-2xl font-bold">History:</h2>
-        <ul className="mt-5">
-          {plays.map((play, index) => (
-            <li key={index}>
-              {play.winner.name} beat {play.looser.name}
-            </li>
-          ))}
-        </ul>
-      </section>
+      <div className="flex gap-5 flex-col sm:flex-row">
+        <section className="mt-5">
+          <h2 className="text-xl font-bold">Magic skill number</h2>
+          <Reorder.Group
+            axis="y"
+            values={players.sort((a, b) => b.score - a.score)}
+            onReorder={() => undefined}
+          >
+            {players
+              .sort((a, b) => b.id - a.id)
+              .sort((a, b) => b.score - a.score)
+              .map((player, index) => (
+                <Reorder.Item key={player.id} value={player}>
+                  {index + 1}. {player.name} - {player.score}
+                </Reorder.Item>
+              ))}
+          </Reorder.Group>
+        </section>
+        <section className="mt-5">
+          <h2 className="text-xl font-bold">Wins</h2>
+          <Reorder.Group
+            axis="y"
+            values={players.sort((a, b) => b.score - a.score)}
+            onReorder={() => undefined}
+          >
+            {players
+              .sort((a, b) => b.id - a.id)
+              .sort((a, b) => b.wins - a.wins)
+              .map((player, index) => (
+                <Reorder.Item key={player.id} value={player}>
+                  {index + 1}. {player.name} - {player.wins}
+                </Reorder.Item>
+              ))}
+          </Reorder.Group>
+        </section>
+      </div>
     </main>
   );
 }

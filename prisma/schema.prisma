@@ -9,11 +9,12 @@ datasource db {
 }
 
 model Player {
-    id     Int    @id @default(autoincrement())
-    name   String
-    score  Int    @default(400)
-    wins   Game[] @relation(name: "winner")
-    losses Game[] @relation(name: "looser")
+    id        Int    @id @default(autoincrement())
+    name      String
+    score     Int    @default(400)
+    wins      Int    @default(0)
+    wonGames  Game[] @relation(name: "winner")
+    lostGames Game[] @relation(name: "looser")
 }
 
 model Game {
