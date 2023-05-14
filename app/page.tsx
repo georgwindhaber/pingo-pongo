@@ -152,41 +152,42 @@ export default function Home() {
           Submit
         </button>
       </div>
-      <section className="mt-5">
-        <h2 className="text-2xl font-bold">Magic skill number</h2>
-        <Reorder.Group
-          axis="y"
-          values={players.sort((a, b) => b.score - a.score)}
-          onReorder={() => undefined}
-        >
-          {players
-            .sort((a, b) => b.id - a.id)
-            .sort((a, b) => b.score - a.score)
-            .map((player, index) => (
-              <Reorder.Item key={player.id} value={player}>
-                {index + 1}. {player.name} - {player.score}
-              </Reorder.Item>
-            ))}
-        </Reorder.Group>
-      </section>
-      <section className="mt-5">
-        <h2 className="text-2xl font-bold">Wins</h2>
-        <Reorder.Group
-          axis="y"
-          values={players.sort((a, b) => b.score - a.score)}
-          onReorder={() => undefined}
-        >
-          {players
-            .sort((a, b) => b.id - a.id)
-            .sort((a, b) => b.wins - a.wins)
-            .map((player, index) => (
-              <Reorder.Item key={player.id} value={player}>
-                {index + 1}. {player.name} - {player.wins}
-              </Reorder.Item>
-            ))}
-        </Reorder.Group>
-      </section>
-      {isLoading && <span className="loader opacity-70"></span>}
+      <div className="flex gap-5 flex-col sm:flex-row">
+        <section className="mt-5">
+          <h2 className="text-xl font-bold">Magic skill number</h2>
+          <Reorder.Group
+            axis="y"
+            values={players.sort((a, b) => b.score - a.score)}
+            onReorder={() => undefined}
+          >
+            {players
+              .sort((a, b) => b.id - a.id)
+              .sort((a, b) => b.score - a.score)
+              .map((player, index) => (
+                <Reorder.Item key={player.id} value={player}>
+                  {index + 1}. {player.name} - {player.score}
+                </Reorder.Item>
+              ))}
+          </Reorder.Group>
+        </section>
+        <section className="mt-5">
+          <h2 className="text-xl font-bold">Wins</h2>
+          <Reorder.Group
+            axis="y"
+            values={players.sort((a, b) => b.score - a.score)}
+            onReorder={() => undefined}
+          >
+            {players
+              .sort((a, b) => b.id - a.id)
+              .sort((a, b) => b.wins - a.wins)
+              .map((player, index) => (
+                <Reorder.Item key={player.id} value={player}>
+                  {index + 1}. {player.name} - {player.wins}
+                </Reorder.Item>
+              ))}
+          </Reorder.Group>
+        </section>
+      </div>
     </main>
   );
 }
