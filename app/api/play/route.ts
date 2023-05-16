@@ -32,13 +32,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ response: "error" });
   }
 
+  const kFactor = 32;
+
   const newWinnerProbability =
     1 / (1 + 10 ** ((looser.score - winner.score) / 400));
   const newLooserProbability =
     1 / (1 + 10 ** ((winner.score - looser.score) / 400));
 
-  const newWinnerScore = winner.score + 20 * (1 - newWinnerProbability);
-  const newLooserScore = looser.score + 20 * (0 - newLooserProbability);
+  const newWinnerScore = winner.score + kFactor * (1 - newWinnerProbability);
+  const newLooserScore = looser.score + kFactor * (0 - newLooserProbability);
 
   const setWinnerRequest = prisma.player.update({
     where: {
